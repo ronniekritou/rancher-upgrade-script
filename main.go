@@ -12,17 +12,16 @@ import (
 )
 
 func main() {
-	dockerImage := os.Getenv("DOCKER_IMAGE")
 	authSid := os.Getenv("RANCHER_AUTH_SID")
 	authKey := os.Getenv("RANCHER_AUTH_KEY")
 	baseUrl := os.Getenv("RANCHER_BASE_URL")
+	jsonString := os.Getenv("RANCHER_LAUNCH_CONFIG_JSON")
 
-	jsonString := fmt.Sprintf(`{"inServiceStrategy": { "launchConfig": { "imageUuid":"docker:%s" }},"toServiceStrategy":null}`, dockerImage)
 	client := &http.Client{}
 
 	bodyBytes, err := sendRequest(client, fmt.Sprintf("%s/?action=upgrade", baseUrl), authSid, authKey, jsonString)
 	if err != nil {
-		log.Println("[Upgrade Segment] Error on upgrade : ", err.Error())
+		fmt.Println("[Upgrade Segment] Error on upgrade : ", err.Error())
 		return
 	}
 
@@ -32,9 +31,9 @@ func main() {
 		fmt.Println("[Finish Upgrade Segment] Upgrade request went through!")
 
 		triedToUpgrade = true
-		for i := 0; i < 10; i++ {
-			fmt.Println("[Finish Upgrade Segment] Sleeping for 30 seconds for upgrade to finish...")
-			time.Sleep(time.Second * 30)
+		for i := 0; i < 30; i++ {
+			fmt.Println("[Finish Upgrade Segment] Sleeping for 10 seconds for upgrade to finish...")
+			time.Sleep(time.Second * 10)
 			fmt.Println("[Finish Upgrade Segment] After sleeping, attempting to upgrade!")
 
 			bodyBytes, err := sendRequest(client, fmt.Sprintf("%s/?action=finishupgrade", baseUrl), authSid, authKey, jsonString)
@@ -69,7 +68,6 @@ func main() {
 	}
 
 	fmt.Println("[Upgrade Segment] Proccess complete ?", upgradeCompleted)
-
 }
 
 func sendRequest(client *http.Client, url string, authSid string, authKey string, jsonString string) (string, error) {
