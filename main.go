@@ -75,7 +75,7 @@ func sendRequest(client *http.Client, url string, authSid string, authKey string
 	if err != nil {
 		return "", err
 	}
-	httpRequest.SetBasicAuth("2FE021DE8629C05B38BD", "DQ7iouah9GmqMZMDiFEJt7Yw8bApi9aUnfwhCdBb")
+	httpRequest.SetBasicAuth(authSid, authKey)
 	httpRequest.Header.Set("Content-Type", "application/json")
 
 	resp, err := client.Do(httpRequest)
